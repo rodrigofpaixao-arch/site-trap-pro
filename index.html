@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Ranking Trap</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+</head>
+
+<body>
+
+<header>
+  <h1>🏆 Trap Ranking</h1>
+  <nav>
+    <a href="index.html">Ranking</a>
+    <a href="atletas.html">Atletas</a>
+    <a href="clubes.html">Clubes</a>
+  </nav>
+</header>
+
+<div class="container">
+  <h2>Ranking Geral</h2>
+  <div id="ranking"></div>
+</div>
+
+<script src="app.js"></script>
+
+<script>
+async function carregar() {
+  let lista = await getRanking();
+  const div = document.getElementById('ranking');
+
+  lista.forEach((item, i) => {
+    div.innerHTML += `
+      <div class="card">
+        <div class="rank">${i+1}º</div>
+        ${item.nome} - ${item.clube}
+        <br><strong>${item.pontos} pts</strong>
+      </div>
+    `;
+  });
+}
+
+carregar();
+</script>
+
+</body>
+</html>

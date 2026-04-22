@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Atletas</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+</head>
+
+<body>
+
+<header>
+  <h1>🎯 Atletas</h1>
+  <nav>
+    <a href="index.html">Ranking</a>
+    <a href="atletas.html">Atletas</a>
+    <a href="clubes.html">Clubes</a>
+  </nav>
+</header>
+
+<div class="container">
+  <div id="lista"></div>
+</div>
+
+<script src="app.js"></script>
+
+<script>
+async function carregarAtletas() {
+  let { data } = await supabase
+    .from('atiradores')
+    .select('nome, categoria, clubes(nome)');
+
+  const div = document.getElementById('lista');
+
+  data.forEach(a => {
+    div.innerHTML += `
+      <div class="card">
+        ${a.nome} <br>
+        ${a.categoria} - ${a.clubes.nome}
+      </div>
+    `;
+  });
+}
+
+carregarAtletas();
+</script>
+
+</body>
+</html>

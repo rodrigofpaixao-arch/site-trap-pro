@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Clubes</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+</head>
+
+<body>
+
+<header>
+  <h1>🏟️ Clubes</h1>
+  <nav>
+    <a href="index.html">Ranking</a>
+    <a href="atletas.html">Atletas</a>
+    <a href="clubes.html">Clubes</a>
+  </nav>
+</header>
+
+<div class="container">
+  <div id="clubes"></div>
+</div>
+
+<script src="app.js"></script>
+
+<script>
+async function carregarClubes() {
+  let { data } = await supabase.from('clubes').select('*');
+
+  const div = document.getElementById('clubes');
+
+  data.forEach(c => {
+    div.innerHTML += `
+      <div class="card">
+        ${c.nome} <br>
+        ${c.cidade}
+      </div>
+    `;
+  });
+}
+
+carregarClubes();
+</script>
+
+</body>
+</html>
