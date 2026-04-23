@@ -37,100 +37,14 @@
 <input id="pontos" placeholder="Pontos">
 <button onclick="addPontuacao()">Salvar</button>
 
+
 <script>
 const { createClient } = supabase;
 const client = createClient("SUA_URL", "SUA_KEY");
 
-// 🔥 FUNÇÕES GARANTIDAS
-
-async function carregar() {
-
-  let { data: modalidades } = await client.from('modalidades').select('*');
-  let sm = document.getElementById('select_modalidade');
-  sm.innerHTML = '';
-  modalidades.forEach(m => {
-    sm.innerHTML += `<option value="${m.id}">${m.nome}</option>`;
-  });
-
-  let { data: clubes } = await client.from('clubes').select('*');
-  let sc = document.getElementById('select_clube');
-  sc.innerHTML = '';
-  clubes.forEach(c => {
-    sc.innerHTML += `<option value="${c.id}">${c.nome}</option>`;
-  });
-
-  let { data: atletas } = await client.from('atiradores').select('*');
-  let sa = document.getElementById('select_atleta');
-  sa.innerHTML = '';
-  atletas.forEach(a => {
-    sa.innerHTML += `<option value="${a.id}">${a.nome}</option>`;
-  });
-
-  let { data: etapas } = await client.from('etapas').select('*');
-  let se = document.getElementById('select_etapa');
-  se.innerHTML = '';
-  etapas.forEach(e => {
-    se.innerHTML += `<option value="${e.id}">${e.nome}</option>`;
-  });
-}
-
-// ✅ AGORA EXISTEM DE VERDADE
-
-async function addModalidade() {
-  let nome = document.getElementById('modalidade_nome').value;
-  await client.from('modalidades').insert([{ nome }]);
-  alert("Modalidade salva");
-  carregar();
-}
-
-async function addEtapa() {
-  let nome = document.getElementById('etapa_nome').value;
-  let data = document.getElementById('etapa_data').value;
-  let modalidade_id = document.getElementById('select_modalidade').value;
-
-  await client.from('etapas').insert([{ nome, data, modalidade_id }]);
-  alert("Etapa salva");
-  carregar();
-}
-
-async function addClube() {
-  let nome = document.getElementById('clube_nome').value;
-  let cidade = document.getElementById('clube_cidade').value;
-
-  await client.from('clubes').insert([{ nome, cidade }]);
-  alert("Clube salvo");
-  carregar();
-}
-
-async function addAtleta() {
-  let nome = document.getElementById('atleta_nome').value;
-  let categoria = document.getElementById('atleta_categoria').value;
-  let sexo = document.getElementById('atleta_sexo').value;
-  let clube_id = document.getElementById('select_clube').value;
-
-  await client.from('atiradores').insert([
-    { nome, categoria, sexo, clube_id }
-  ]);
-
-  alert("Atleta salvo");
-  carregar();
-}
-
-async function addPontuacao() {
-  let atirador_id = document.getElementById('select_atleta').value;
-  let etapa_id = document.getElementById('select_etapa').value;
-  let pontos = document.getElementById('pontos').value;
-
-  await client.from('pontuacoes').insert([
-    { atirador_id, etapa_id, pontos }
-  ]);
-
-  alert("Pontuação salva");
-}
-
-// INICIA
-carregar();
+// resto do código...
 </script>
+
 
 </body>
 </html>
