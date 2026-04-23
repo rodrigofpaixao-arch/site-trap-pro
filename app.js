@@ -12,12 +12,14 @@ async function getRanking() {
 
   data.forEach(p => {
     let nome = p.atiradores.nome;
+
     if (!ranking[nome]) {
       ranking[nome] = {
         pontos: 0,
         clube: p.atiradores.clubes.nome
       };
     }
+
     ranking[nome].pontos += p.pontos;
   });
 

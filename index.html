@@ -18,20 +18,39 @@
 </header>
 
 <div class="container">
+
   <h2>Ranking Geral</h2>
+
+  <div class="search">
+    <input type="text" id="busca" placeholder="Buscar atleta...">
+  </div>
+
   <div id="ranking"></div>
+
 </div>
 
 <script src="app.js"></script>
 
 <script>
+let rankingGlobal = [];
+
 async function carregar() {
-  let lista = await getRanking();
+  rankingGlobal = await getRanking();
+  renderizar(rankingGlobal);
+}
+
+function renderizar(lista) {
   const div = document.getElementById('ranking');
+  div.innerHTML = '';
 
   lista.forEach((item, i) => {
+    let classe = '';
+    if (i === 0) classe = 'gold';
+    else if (i === 1) classe = 'silver';
+    else if (i === 2) classe = 'bronze';
+
     div.innerHTML += `
-      <div class="card">
+      <div class="card ${classe}">
         <div class="rank">${i+1}º</div>
         ${item.nome} - ${item.clube}
         <br><strong>${item.pontos} pts</strong>
@@ -39,6 +58,16 @@ async function carregar() {
     `;
   });
 }
+
+document.getElementById('busca').addEventListener('input', (e) => {
+  let termo = e.target.value.toLowerCase();
+
+  let filtrado = rankingGlobal.filter(a =>
+    a.nome.toLowerCase().includes(termo)
+  );
+
+  renderizar(filtrado);
+});
 
 carregar();
 </script>

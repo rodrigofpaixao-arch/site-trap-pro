@@ -1,16 +1,17 @@
 body {
   margin: 0;
   font-family: Arial;
-  background: #0b1220;
+  background: linear-gradient(135deg, #020617, #0f172a);
   color: white;
 }
 
 header {
   background: #020617;
-  padding: 15px;
+  padding: 15px 30px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  border-bottom: 1px solid #1e293b;
 }
 
 header h1 {
@@ -18,7 +19,7 @@ header h1 {
 }
 
 nav a {
-  color: white;
+  color: #cbd5f5;
   margin: 0 10px;
   text-decoration: none;
 }
@@ -28,15 +29,25 @@ nav a:hover {
 }
 
 .container {
-  padding: 20px;
+  padding: 30px;
+}
+
+.search input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  background: #1e293b;
+  color: white;
+  margin-bottom: 20px;
 }
 
 .card {
   background: #111827;
   border-left: 5px solid gold;
   padding: 15px;
-  margin-bottom: 10px;
-  border-radius: 8px;
+  margin-bottom: 12px;
+  border-radius: 10px;
   transition: 0.2s;
 }
 
@@ -45,7 +56,10 @@ nav a:hover {
 }
 
 .rank {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: bold;
-  color: gold;
 }
+
+.gold { border-left: 5px solid gold; }
+.silver { border-left: 5px solid silver; }
+.bronze { border-left: 5px solid #cd7f32; }
