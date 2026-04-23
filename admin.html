@@ -3,55 +3,89 @@
 <head>
   <title>Painel Admin</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
   <style>
     body {
-      background: #0f172a;
+      background: #020617;
       color: white;
       font-family: Arial;
       padding: 20px;
     }
 
-    h2 {
+    h1, h2 {
       color: gold;
+    }
+
+    .box {
+      background: #111827;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
     }
 
     input, select, button {
       display: block;
-      margin: 10px 0;
+      margin: 8px 0;
       padding: 10px;
       width: 300px;
+      border-radius: 6px;
+      border: none;
     }
 
     button {
       background: gold;
-      border: none;
       cursor: pointer;
+      font-weight: bold;
+    }
+
+    .list {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #cbd5f5;
     }
   </style>
 </head>
 
 <body>
 
-<h1>⚙️ Painel Admin</h1>
+<h1>⚙️ Painel Administrativo</h1>
 
-<h2>🏟️ Cadastrar Clube</h2>
-<input id="clube_nome" placeholder="Nome do clube">
-<input id="clube_cidade" placeholder="Cidade">
-<button onclick="addClube()">Salvar Clube</button>
+<!-- CLUBES -->
+<div class="box">
+  <h2>🏟️ Clubes</h2>
+  <input id="clube_nome" placeholder="Nome do clube">
+  <input id="clube_cidade" placeholder="Cidade">
+  <button onclick="addClube()">Cadastrar Clube</button>
 
-<h2>🎯 Cadastrar Atleta</h2>
-<input id="atleta_nome" placeholder="Nome">
-<input id="atleta_categoria" placeholder="Categoria">
-<input id="atleta_sexo" placeholder="Sexo">
-<input id="atleta_clube" placeholder="ID do Clube">
-<button onclick="addAtleta()">Salvar Atleta</button>
+  <div class="list" id="listaClubes"></div>
+</div>
 
-<h2>📊 Lançar Pontuação</h2>
-<input id="pontuacao_atleta" placeholder="ID do Atleta">
-<input id="pontuacao_etapa" placeholder="Etapa">
-<input id="pontuacao_data" placeholder="Data (YYYY-MM-DD)">
-<input id="pontuacao_pontos" placeholder="Pontos">
-<button onclick="addPontuacao()">Salvar Pontuação</button>
+<!-- ATLETAS -->
+<div class="box">
+  <h2>🎯 Atletas</h2>
+  <input id="atleta_nome" placeholder="Nome">
+  <input id="atleta_categoria" placeholder="Categoria">
+  <input id="atleta_sexo" placeholder="Sexo">
+
+  <select id="select_clube"></select>
+
+  <button onclick="addAtleta()">Cadastrar Atleta</button>
+
+  <div class="list" id="listaAtletas"></div>
+</div>
+
+<!-- PONTUAÇÃO -->
+<div class="box">
+  <h2>📊 Pontuação</h2>
+
+  <select id="select_atleta"></select>
+
+  <input id="pontuacao_etapa" placeholder="Etapa">
+  <input id="pontuacao_data" type="date">
+  <input id="pontuacao_pontos" placeholder="Pontos">
+
+  <button onclick="addPontuacao()">Lançar Pontuação</button>
+</div>
 
 <script>
 const supabase = supabase.createClient(
@@ -59,7 +93,41 @@ const supabase = supabase.createClient(
   "sb_secret_zFn5frdUbjYDFkEWlVtsjQ_Z6qO090b"
 );
 
-// CLUBE
+// CARREGAR DADOS
+async function carregarDados() {
+
+  // CLUBES
+  let { data: clubes } = await supabase.from('clubes').select('*');
+
+  let selectClubes = document.getElementById('select_clube');
+  let listaClubes = document.getElementById('listaClubes');
+
+  selectClubes.innerHTML = '';
+  listaClubes.innerHTML = '';
+
+  clubes.forEach(c => {
+    selectClubes.innerHTML += `<option value="${c.id}">${c.nome}</option>`;
+    listaClubes.innerHTML += `${c.id} - ${c.nome}<br>`;
+  });
+
+  // ATLETAS
+  let { data: atletas } = await supabase
+    .from('atiradores')
+    .select('id, nome, clubes(nome)');
+
+  let selectAtleta = document.getElementById('select_atleta');
+  let listaAtletas = document.getElementById('listaAtletas');
+
+  selectAtleta.innerHTML = '';
+  listaAtletas.innerHTML = '';
+
+  atletas.forEach(a => {
+    selectAtleta.innerHTML += `<option value="${a.id}">${a.nome}</option>`;
+    listaAtletas.innerHTML += `${a.id} - ${a.nome} (${a.clubes.nome})<br>`;
+  });
+}
+
+// CADASTRAR CLUBE
 async function addClube() {
   let nome = document.getElementById('clube_nome').value;
   let cidade = document.getElementById('clube_cidade').value;
@@ -67,25 +135,27 @@ async function addClube() {
   await supabase.from('clubes').insert([{ nome, cidade }]);
 
   alert("Clube cadastrado!");
+  carregarDados();
 }
 
-// ATLETA
+// CADASTRAR ATLETA
 async function addAtleta() {
   let nome = document.getElementById('atleta_nome').value;
   let categoria = document.getElementById('atleta_categoria').value;
   let sexo = document.getElementById('atleta_sexo').value;
-  let clube_id = document.getElementById('atleta_clube').value;
+  let clube_id = document.getElementById('select_clube').value;
 
   await supabase.from('atiradores').insert([
     { nome, categoria, sexo, clube_id }
   ]);
 
   alert("Atleta cadastrado!");
+  carregarDados();
 }
 
-// PONTUAÇÃO
+// LANÇAR PONTUAÇÃO
 async function addPontuacao() {
-  let atirador_id = document.getElementById('pontuacao_atleta').value;
+  let atirador_id = document.getElementById('select_atleta').value;
   let etapa = document.getElementById('pontuacao_etapa').value;
   let data = document.getElementById('pontuacao_data').value;
   let pontos = document.getElementById('pontuacao_pontos').value;
@@ -96,6 +166,9 @@ async function addPontuacao() {
 
   alert("Pontuação registrada!");
 }
+
+// INICIAR
+carregarDados();
 </script>
 
 </body>
