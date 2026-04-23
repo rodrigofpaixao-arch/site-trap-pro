@@ -2,46 +2,73 @@
 <html>
 <head>
   <title>Atletas</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
-<body>
+<body style="background:#0f172a;color:white;font-family:Arial;padding:20px;">
 
-<header>
-  <h1>🎯 Atletas</h1>
-  <nav>
-    <a href="index.html">Ranking</a>
-    <a href="atletas.html">Atletas</a>
-    <a href="clubes.html">Clubes</a>
-  </nav>
-</header>
+<h1>🎯 Lista de Atletas</h1>
 
-<div class="container">
-  <div id="lista"></div>
-</div>
-
-<script src="app.js"></script>
+<table border="1" cellpadding="10" style="border-collapse:collapse;">
+  <thead>
+    <tr>
+      <th>Nome</th>
+      <th>Categoria</th>
+      <th>Sexo</th>
+      <th>Clube</th>
+    </tr>
+  </thead>
+  <tbody id="listaAtletas"></tbody>
+</table>
 
 <script>
-async function carregarAtletas() {
-  let { data } = await supabase
-    .from('atiradores')
-    .select('nome, categoria, clubes(nome)');
+let client;
 
-  const div = document.getElementById('lista');
+// INICIAR
+window.onload = async function () {
+
+  const { createClient } = supabase;
+
+  client = createClient(
+    "https://izpvoeeedpmzvmtartsa.supabase.co",
+    "SUA_ANON_KEY_AQUI"
+  );
+
+  carregarAtletas();
+};
+
+// CARREGAR ATLETAS
+async function carregarAtletas() {
+
+  let { data, error } = await client
+    .from('atiradores')
+    .select(`
+      nome,
+      categoria,
+      sexo,
+      clubes (nome)
+    `);
+
+  if (error) {
+    console.error("Erro:", error);
+    return;
+  }
+
+  let html = "";
 
   data.forEach(a => {
-    div.innerHTML += `
-      <div class="card">
-        ${a.nome}<br>
-        ${a.categoria} - ${a.clubes.nome}
-      </div>
+    html += `
+      <tr>
+        <td>${a.nome}</td>
+        <td>${a.categoria}</td>
+        <td>${a.sexo}</td>
+        <td>${a.clubes?.nome || "-"}</td>
+      </tr>
     `;
   });
-}
 
-carregarAtletas();
+  document.getElementById("listaAtletas").innerHTML = html;
+}
 </script>
 
 </body>
