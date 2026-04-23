@@ -1,144 +1,103 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Painel Admin</title>
+  <title>Admin</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-
-  <style>
-    body {
-      background: #020617;
-      color: white;
-      font-family: Arial;
-      padding: 20px;
-    }
-
-    h1, h2 {
-      color: gold;
-    }
-
-    .box {
-      background: #111827;
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-    }
-
-    input, select, button {
-      display: block;
-      margin: 8px 0;
-      padding: 10px;
-      width: 300px;
-      border-radius: 6px;
-      border: none;
-    }
-
-    button {
-      background: gold;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    .list {
-      margin-top: 10px;
-      font-size: 14px;
-      color: #cbd5f5;
-    }
-  </style>
 </head>
 
-<body>
+<body style="background:#0f172a;color:white;font-family:Arial;padding:20px;">
 
-<h1>⚙️ Painel Administrativo</h1>
+<h1>Painel</h1>
 
-<!-- CLUBES -->
-<div class="box">
-  <h2>🏟️ Clubes</h2>
-  <input id="clube_nome" placeholder="Nome do clube">
-  <input id="clube_cidade" placeholder="Cidade">
-  <button onclick="addClube()">Cadastrar Clube</button>
+<h2>Modalidade</h2>
+<input id="modalidade_nome" placeholder="Nome">
+<button onclick="addModalidade()">Salvar</button>
 
-  <div class="list" id="listaClubes"></div>
-</div>
+<h2>Etapa</h2>
+<input id="etapa_nome" placeholder="Nome">
+<input id="etapa_data" type="date">
+<select id="select_modalidade"></select>
+<button onclick="addEtapa()">Salvar</button>
 
-<!-- ATLETAS -->
-<div class="box">
-  <h2>🎯 Atletas</h2>
-  <input id="atleta_nome" placeholder="Nome">
-  <input id="atleta_categoria" placeholder="Categoria">
-  <input id="atleta_sexo" placeholder="Sexo">
+<h2>Clube</h2>
+<input id="clube_nome" placeholder="Nome">
+<input id="clube_cidade" placeholder="Cidade">
+<button onclick="addClube()">Salvar</button>
 
-  <select id="select_clube"></select>
+<h2>Atleta</h2>
+<input id="atleta_nome" placeholder="Nome">
+<input id="atleta_categoria" placeholder="Categoria">
+<input id="atleta_sexo" placeholder="Sexo">
+<select id="select_clube"></select>
+<button onclick="addAtleta()">Salvar</button>
 
-  <button onclick="addAtleta()">Cadastrar Atleta</button>
-
-  <div class="list" id="listaAtletas"></div>
-</div>
-
-<!-- PONTUAÇÃO -->
-<div class="box">
-  <h2>📊 Pontuação</h2>
-
-  <select id="select_atleta"></select>
-
-  <input id="pontuacao_etapa" placeholder="Etapa">
-  <input id="pontuacao_data" type="date">
-  <input id="pontuacao_pontos" placeholder="Pontos">
-
-  <button onclick="addPontuacao()">Lançar Pontuação</button>
-</div>
+<h2>Pontuação</h2>
+<select id="select_atleta"></select>
+<select id="select_etapa"></select>
+<input id="pontos" placeholder="Pontos">
+<button onclick="addPontuacao()">Salvar</button>
 
 <script>
 const supabase = supabase.createClient(
-  "sb_publishable_MZdbaT0GRL7WqBbC8G0cVQ_fTz9VgPj",
-  "sb_secret_zFn5frdUbjYDFkEWlVtsjQ_Z6qO090b"
+  "SUA_URL",
+  "SUA_KEY"
 );
 
-// CARREGAR DADOS
-async function carregarDados() {
+async function carregar() {
 
-  // CLUBES
-  let { data: clubes } = await supabase.from('clubes').select('*');
-
-  let selectClubes = document.getElementById('select_clube');
-  let listaClubes = document.getElementById('listaClubes');
-
-  selectClubes.innerHTML = '';
-  listaClubes.innerHTML = '';
-
-  clubes.forEach(c => {
-    selectClubes.innerHTML += `<option value="${c.id}">${c.nome}</option>`;
-    listaClubes.innerHTML += `${c.id} - ${c.nome}<br>`;
+  let { data: modalidades } = await supabase.from('modalidades').select('*');
+  let sm = document.getElementById('select_modalidade');
+  sm.innerHTML = '';
+  modalidades.forEach(m => {
+    sm.innerHTML += `<option value="${m.id}">${m.nome}</option>`;
   });
 
-  // ATLETAS
-  let { data: atletas } = await supabase
-    .from('atiradores')
-    .select('id, nome, clubes(nome)');
+  let { data: clubes } = await supabase.from('clubes').select('*');
+  let sc = document.getElementById('select_clube');
+  sc.innerHTML = '';
+  clubes.forEach(c => {
+    sc.innerHTML += `<option value="${c.id}">${c.nome}</option>`;
+  });
 
-  let selectAtleta = document.getElementById('select_atleta');
-  let listaAtletas = document.getElementById('listaAtletas');
-
-  selectAtleta.innerHTML = '';
-  listaAtletas.innerHTML = '';
-
+  let { data: atletas } = await supabase.from('atiradores').select('*');
+  let sa = document.getElementById('select_atleta');
+  sa.innerHTML = '';
   atletas.forEach(a => {
-    selectAtleta.innerHTML += `<option value="${a.id}">${a.nome}</option>`;
-    listaAtletas.innerHTML += `${a.id} - ${a.nome} (${a.clubes.nome})<br>`;
+    sa.innerHTML += `<option value="${a.id}">${a.nome}</option>`;
+  });
+
+  let { data: etapas } = await supabase.from('etapas').select('*');
+  let se = document.getElementById('select_etapa');
+  se.innerHTML = '';
+  etapas.forEach(e => {
+    se.innerHTML += `<option value="${e.id}">${e.nome}</option>`;
   });
 }
 
-// CADASTRAR CLUBE
+// INSERTS
+async function addModalidade() {
+  let nome = document.getElementById('modalidade_nome').value;
+  await supabase.from('modalidades').insert([{ nome }]);
+  carregar();
+}
+
+async function addEtapa() {
+  let nome = document.getElementById('etapa_nome').value;
+  let data = document.getElementById('etapa_data').value;
+  let modalidade_id = document.getElementById('select_modalidade').value;
+
+  await supabase.from('etapas').insert([{ nome, data, modalidade_id }]);
+  carregar();
+}
+
 async function addClube() {
   let nome = document.getElementById('clube_nome').value;
   let cidade = document.getElementById('clube_cidade').value;
 
   await supabase.from('clubes').insert([{ nome, cidade }]);
-
-  alert("Clube cadastrado!");
-  carregarDados();
+  carregar();
 }
 
-// CADASTRAR ATLETA
 async function addAtleta() {
   let nome = document.getElementById('atleta_nome').value;
   let categoria = document.getElementById('atleta_categoria').value;
@@ -149,26 +108,22 @@ async function addAtleta() {
     { nome, categoria, sexo, clube_id }
   ]);
 
-  alert("Atleta cadastrado!");
-  carregarDados();
+  carregar();
 }
 
-// LANÇAR PONTUAÇÃO
 async function addPontuacao() {
   let atirador_id = document.getElementById('select_atleta').value;
-  let etapa = document.getElementById('pontuacao_etapa').value;
-  let data = document.getElementById('pontuacao_data').value;
-  let pontos = document.getElementById('pontuacao_pontos').value;
+  let etapa_id = document.getElementById('select_etapa').value;
+  let pontos = document.getElementById('pontos').value;
 
   await supabase.from('pontuacoes').insert([
-    { atirador_id, etapa, data, pontos }
+    { atirador_id, etapa_id, pontos }
   ]);
 
-  alert("Pontuação registrada!");
+  alert("Salvo!");
 }
 
-// INICIAR
-carregarDados();
+carregar();
 </script>
 
 </body>
