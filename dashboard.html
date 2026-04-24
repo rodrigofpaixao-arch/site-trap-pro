@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    body { margin:0; font-family:Arial; background:#0f172a; color:white; display:flex; }
+    .sidebar { width:220px; background:#020617; height:100vh; padding:20px; }
+    .sidebar h2 { color:gold; }
+    .sidebar a { display:block; color:white; margin:10px 0; padding:8px; text-decoration:none; border-radius:6px; }
+    .sidebar a:hover { background:gold; color:black; }
+    .content { flex:1; padding:20px; }
+    .grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+    .card { background:#020617; padding:15px; border-radius:10px; }
+    table { width:100%; border-collapse:collapse; }
+    th, td { border:1px solid #334155; padding:8px; }
+    th { background:#1e293b; }
+    h2 { color:gold; }
+  </style>
+</head>
+
+<body>
+
+<div class="sidebar">
+  <h2>🏆 Sistema</h2>
+  <a href="dashboard.html">📊 Dashboard</a>
+  <a href="index.html">🏠 Ranking</a>
+  <a href="atletas.html">🎯 Atletas</a>
+  <a href="info.html">ℹ️ Informações</a>
+  <a href="admin.html">⚙️ Admin</a>
+</div>
+
+<div class="content">
+<h1>📊 Dashboard</h1>
+
+<div class="grid">
+  <div class="card"><h2>👩 Feminino</h2><table><tbody id="feminino"></tbody></table></div>
+  <div class="card"><h2>👨 Masculino A</h2><table><tbody id="mascA"></tbody></table></div>
+  <div class="card"><h2>👨 Masculino B</h2><table><tbody id="mascB"></tbody></table></div>
+</div>
+
+</div>
+
+<script>
+const { createClient } = supabase;
+
+const client = createClient(
+  "https://izpvoeeedpmzvmtartsa.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6cHZvZWVlZHBtenZtdGFydHNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4ODc3NjMsImV4cCI6MjA5MjQ2Mzc2M30.AoYhypS7MhMfb-HuaxkIFgt2Kmw1pcsJlIooo4eDI28"
+);
+
+async function carregar() {
+  let { data } = await client
+    .from('pontuacoes')
+    .select(`pontos, atiradores (nome, sexo, categoria)`);
+
+  let ranking = {};
+
+  data.forEach(p => {
+    let a = p.atiradores;
+    if (!a) return;
+
+    if (!ranking[a.nome]) {
+      ranking[a.nome] = { pontos:0, sexo:a.sexo, categoria:a.categoria };
+    }
+    ranking[a.nome].pontos += p.pontos;
+  });
+
+  let lista = Object.entries(ranking).map(([nome,d]) => ({ nome, ...d }));
+
+  function render(filtro, id) {
+    let html = "";
+    lista.filter(filtro).sort((a,b)=>b.pontos-a.pontos).forEach((item,i)=>{
+      html += `<tr><td>${i+1}</td><td>${item.nome}</td><td>${item.pontos}</td></tr>`;
+    });
+    document.getElementById(id).innerHTML = html;
+  }
+
+  render(a => a.sexo === "F", "feminino");
+  render(a => a.sexo === "M" && a.categoria === "A", "mascA");
+  render(a => a.sexo === "M" && a.categoria === "B", "mascB");
+}
+
+carregar();
+</script>
+
+</body>
+</html>

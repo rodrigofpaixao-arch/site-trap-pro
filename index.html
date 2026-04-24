@@ -1,75 +1,62 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Ranking Trap</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <title>Ranking</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
-<body>
+<body style="background:#0f172a;color:white;font-family:Arial;padding:20px;">
 
-<header>
-  <h1>🏆 Trap Ranking</h1>
-  <nav>
-    <a href="index.html">Ranking</a>
-    <a href="atletas.html">Atletas</a>
-    <a href="clubes.html">Clubes</a>
-  </nav>
-</header>
+<h1>🏆 Ranking Geral</h1>
 
-<div class="container">
-
-  <h2>Ranking Geral</h2>
-
-  <div class="search">
-    <input type="text" id="busca" placeholder="Buscar atleta...">
-  </div>
-
-  <div id="ranking"></div>
-
-</div>
-
-<script src="app.js"></script>
+<table border="1">
+<thead>
+<tr><th>#</th><th>Nome</th><th>Clube</th><th>Pontos</th></tr>
+</thead>
+<tbody id="ranking"></tbody>
+</table>
 
 <script>
-let rankingGlobal = [];
+const { createClient } = supabase;
 
-async function carregar() {
-  rankingGlobal = await getRanking();
-  renderizar(rankingGlobal);
-}
+const client = createClient(
+  "https://izpvoeeedpmzvmtartsa.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6cHZvZWVlZHBtenZtdGFydHNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4ODc3NjMsImV4cCI6MjA5MjQ2Mzc2M30.AoYhypS7MhMfb-HuaxkIFgt2Kmw1pcsJlIooo4eDI28"
+);
 
-function renderizar(lista) {
-  const div = document.getElementById('ranking');
-  div.innerHTML = '';
+async function carregarRanking() {
+  let { data } = await client
+    .from('pontuacoes')
+    .select(`pontos, atiradores (nome, clubes:clube_id (nome))`);
 
-  lista.forEach((item, i) => {
-    let classe = '';
-    if (i === 0) classe = 'gold';
-    else if (i === 1) classe = 'silver';
-    else if (i === 2) classe = 'bronze';
+  let ranking = {};
 
-    div.innerHTML += `
-      <div class="card ${classe}">
-        <div class="rank">${i+1}º</div>
-        ${item.nome} - ${item.clube}
-        <br><strong>${item.pontos} pts</strong>
-      </div>
-    `;
+  data.forEach(p => {
+    let nome = p.atiradores.nome;
+
+    if (!ranking[nome]) {
+      ranking[nome] = {
+        pontos:0,
+        clube:p.atiradores.clubes?.nome || "-"
+      };
+    }
+
+    ranking[nome].pontos += p.pontos;
   });
+
+  let lista = Object.entries(ranking)
+    .map(([nome,d]) => ({ nome, ...d }))
+    .sort((a,b)=>b.pontos-a.pontos);
+
+  let html="";
+  lista.forEach((i,x)=>{
+    html += `<tr><td>${x+1}</td><td>${i.nome}</td><td>${i.clube}</td><td>${i.pontos}</td></tr>`;
+  });
+
+  document.getElementById("ranking").innerHTML = html;
 }
 
-document.getElementById('busca').addEventListener('input', (e) => {
-  let termo = e.target.value.toLowerCase();
-
-  let filtrado = rankingGlobal.filter(a =>
-    a.nome.toLowerCase().includes(termo)
-  );
-
-  renderizar(filtrado);
-});
-
-carregar();
+carregarRanking();
 </script>
 
 </body>
