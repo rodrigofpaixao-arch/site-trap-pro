@@ -3,18 +3,100 @@
 <head>
   <title>Ranking</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    body { margin:0; font-family:Arial; background:#0f172a; color:white; display:flex; }
+
+    .sidebar {
+      width:220px;
+      background:#020617;
+      height:100vh;
+      padding:20px;
+    }
+
+    .sidebar h2 { color:gold; }
+
+    .sidebar a {
+      display:block;
+      color:white;
+      margin:10px 0;
+      padding:8px;
+      text-decoration:none;
+      border-radius:6px;
+    }
+
+    .sidebar a:hover {
+      background:gold;
+      color:black;
+    }
+
+    .content {
+      flex:1;
+      padding:20px;
+    }
+
+    .topbar {
+      margin-bottom:15px;
+    }
+
+    button {
+      padding:10px;
+      margin-right:10px;
+      background:gold;
+      border:none;
+      cursor:pointer;
+    }
+
+    table {
+      width:100%;
+      border-collapse:collapse;
+    }
+
+    th, td {
+      border:1px solid #334155;
+      padding:10px;
+    }
+
+    th { background:#1e293b; }
+  </style>
 </head>
 
-<body style="background:#0f172a;color:white;font-family:Arial;padding:20px;">
+<body>
 
-<h1>🏆 Ranking Geral</h1>
+<!-- MENU -->
+<div class="sidebar">
+  <h2>🏆 Sistema</h2>
 
-<table border="1">
+  <a href="dashboard.html">📊 Dashboard</a>
+  <a href="index.html">🏠 Ranking</a>
+  <a href="atletas.html">🎯 Atletas</a>
+  <a href="info.html">ℹ️ Informações</a>
+  <a href="admin.html">⚙️ Admin</a>
+</div>
+
+<!-- CONTEÚDO -->
+<div class="content">
+
+<div class="topbar">
+  <button onclick="history.back()">⬅️ Voltar</button>
+  <button onclick="window.location.href='admin.html'">⚙️ Admin</button>
+</div>
+
+<h1>🏆 Ranking</h1>
+
+<table>
 <thead>
-<tr><th>#</th><th>Nome</th><th>Clube</th><th>Pontos</th></tr>
+<tr>
+  <th>#</th>
+  <th>Nome</th>
+  <th>Clube</th>
+  <th>Pontos</th>
+</tr>
 </thead>
 <tbody id="ranking"></tbody>
 </table>
+
+</div>
 
 <script>
 const { createClient } = supabase;
@@ -25,9 +107,21 @@ const client = createClient(
 );
 
 async function carregarRanking() {
-  let { data } = await client
+
+  let { data, error } = await client
     .from('pontuacoes')
-    .select(`pontos, atiradores (nome, clubes:clube_id (nome))`);
+    .select(`
+      pontos,
+      atiradores (
+        nome,
+        clubes:clube_id (nome)
+      )
+    `);
+
+  if (error) {
+    console.error(error);
+    return;
+  }
 
   let ranking = {};
 
@@ -50,7 +144,12 @@ async function carregarRanking() {
 
   let html="";
   lista.forEach((i,x)=>{
-    html += `<tr><td>${x+1}</td><td>${i.nome}</td><td>${i.clube}</td><td>${i.pontos}</td></tr>`;
+    html += `<tr>
+      <td>${x+1}</td>
+      <td>${i.nome}</td>
+      <td>${i.clube}</td>
+      <td>${i.pontos}</td>
+    </tr>`;
   });
 
   document.getElementById("ranking").innerHTML = html;
@@ -59,5 +158,18 @@ async function carregarRanking() {
 carregarRanking();
 </script>
 
+<div class="topbar">
+  <button onclick="history.back()">⬅️ Voltar</button>
+  <button onclick="window.location.href='admin.html'">⚙️ Admin</button>
+</div>
+
+<div class="sidebar">
+  <h2>🏆 Sistema</h2>
+  <a href="dashboard.html">📊 Dashboard</a>
+  <a href="index.html">🏠 Ranking</a>
+  <a href="atletas.html">🎯 Atletas</a>
+  <a href="info.html">ℹ️ Informações</a>
+  <a href="admin.html">⚙️ Admin</a>
+</div>
 </body>
 </html>
