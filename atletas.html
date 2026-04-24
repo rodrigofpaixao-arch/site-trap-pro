@@ -1,62 +1,36 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Atletas</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<title>Atletas</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
-<body style="background:#0f172a;color:white;font-family:Arial;padding:20px;">
+<body style="background:#0f172a;color:white;font-family:Arial;padding:20px">
 
 <h1>🎯 Atletas</h1>
 
 <table border="1">
-<thead>
-<tr><th>Nome</th><th>Categoria</th><th>Sexo</th><th>Clube</th></tr>
-</thead>
-<tbody id="listaAtletas"></tbody>
+<tr><th>Nome</th><th>Sexo</th><th>Categoria</th></tr>
+<tbody id="lista"></tbody>
 </table>
 
 <script>
 const { createClient } = supabase;
+const client = createClient("https://izpvoeeedpmzvmtartsa.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6cHZvZWVlZHBtenZtdGFydHNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4ODc3NjMsImV4cCI6MjA5MjQ2Mzc2M30.AoYhypS7MhMfb-HuaxkIFgt2Kmw1pcsJlIooo4eDI28");
 
-const client = createClient(
-  "https://izpvoeeedpmzvmtartsa.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6cHZvZWVlZHBtenZtdGFydHNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4ODc3NjMsImV4cCI6MjA5MjQ2Mzc2M30.AoYhypS7MhMfb-HuaxkIFgt2Kmw1pcsJlIooo4eDI28"
-);
+async function carregar(){
+let {data}=await client.from('atiradores').select('*')
 
-async function carregar() {
-  let { data } = await client
-    .from('atiradores')
-    .select(`nome, categoria, sexo, clubes:clube_id (nome)`);
+let html=""
+data.forEach(a=>{
+html+=`<tr><td>${a.nome}</td><td>${a.sexo}</td><td>${a.categoria}</td></tr>`
+})
 
-  let html="";
-  data.forEach(a=>{
-    html += `<tr>
-      <td>${a.nome}</td>
-      <td>${a.categoria}</td>
-      <td>${a.sexo}</td>
-      <td>${a.clubes?.nome || "-"}</td>
-    </tr>`;
-  });
-
-  document.getElementById("listaAtletas").innerHTML = html;
+document.getElementById("lista").innerHTML=html
 }
 
-carregar();
+carregar()
 </script>
 
-<div class="topbar">
-  <button onclick="history.back()">⬅️ Voltar</button>
-  <button onclick="window.location.href='admin.html'">⚙️ Admin</button>
-</div>
-
-<div class="sidebar">
-  <h2>🏆 Sistema</h2>
-  <a href="dashboard.html">📊 Dashboard</a>
-  <a href="index.html">🏠 Ranking</a>
-  <a href="atletas.html">🎯 Atletas</a>
-  <a href="info.html">ℹ️ Informações</a>
-  <a href="admin.html">⚙️ Admin</a>
-</div>
 </body>
 </html>

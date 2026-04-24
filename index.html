@@ -1,175 +1,72 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Ranking</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<title>Ranking</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <style>
-    body { margin:0; font-family:Arial; background:#0f172a; color:white; display:flex; }
-
-    .sidebar {
-      width:220px;
-      background:#020617;
-      height:100vh;
-      padding:20px;
-    }
-
-    .sidebar h2 { color:gold; }
-
-    .sidebar a {
-      display:block;
-      color:white;
-      margin:10px 0;
-      padding:8px;
-      text-decoration:none;
-      border-radius:6px;
-    }
-
-    .sidebar a:hover {
-      background:gold;
-      color:black;
-    }
-
-    .content {
-      flex:1;
-      padding:20px;
-    }
-
-    .topbar {
-      margin-bottom:15px;
-    }
-
-    button {
-      padding:10px;
-      margin-right:10px;
-      background:gold;
-      border:none;
-      cursor:pointer;
-    }
-
-    table {
-      width:100%;
-      border-collapse:collapse;
-    }
-
-    th, td {
-      border:1px solid #334155;
-      padding:10px;
-    }
-
-    th { background:#1e293b; }
-  </style>
+<style>
+body{margin:0;font-family:Arial;background:#0f172a;color:white}
+.sidebar{position:fixed;left:-250px;top:0;width:250px;height:100%;background:#020617;padding:20px;transition:.3s}
+.sidebar.active{left:0}
+.sidebar a{display:block;margin:10px 0;padding:10px;color:white;text-decoration:none}
+.topbar{background:#020617;padding:15px;display:flex;gap:10px}
+.content{padding:20px}
+table{width:100%;border-collapse:collapse}
+td,th{border:1px solid #334155;padding:8px}
+@media(min-width:768px){.sidebar{left:0}.content{margin-left:250px}}
+</style>
 </head>
 
 <body>
 
-<!-- MENU -->
-<div class="sidebar">
-  <h2>🏆 Sistema</h2>
-
-  <a href="dashboard.html">📊 Dashboard</a>
-  <a href="index.html">🏠 Ranking</a>
-  <a href="atletas.html">🎯 Atletas</a>
-  <a href="info.html">ℹ️ Informações</a>
-  <a href="admin.html">⚙️ Admin</a>
+<div id="sidebar" class="sidebar">
+<h2>🏆 Sistema</h2>
+<a href="dashboard.html">Dashboard</a>
+<a href="index.html">Ranking</a>
+<a href="atletas.html">Atletas</a>
+<a href="admin.html">Admin</a>
 </div>
-
-<!-- CONTEÚDO -->
-<div class="content">
 
 <div class="topbar">
-  <button onclick="history.back()">⬅️ Voltar</button>
-  <button onclick="window.location.href='admin.html'">⚙️ Admin</button>
+<button onclick="toggleMenu()">☰</button>
+<button onclick="history.back()">⬅️</button>
 </div>
 
+<div class="content">
 <h1>🏆 Ranking</h1>
-
 <table>
-<thead>
-<tr>
-  <th>#</th>
-  <th>Nome</th>
-  <th>Clube</th>
-  <th>Pontos</th>
-</tr>
-</thead>
+<thead><tr><th>#</th><th>Nome</th><th>Pontos</th></tr></thead>
 <tbody id="ranking"></tbody>
 </table>
-
 </div>
 
 <script>
+function toggleMenu(){document.getElementById("sidebar").classList.toggle("active")}
+
 const { createClient } = supabase;
+const client = createClient("https://izpvoeeedpmzvmtartsa.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6cHZvZWVlZHBtenZtdGFydHNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4ODc3NjMsImV4cCI6MjA5MjQ2Mzc2M30.AoYhypS7MhMfb-HuaxkIFgt2Kmw1pcsJlIooo4eDI28");
 
-const client = createClient(
-  "https://izpvoeeedpmzvmtartsa.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6cHZvZWVlZHBtenZtdGFydHNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4ODc3NjMsImV4cCI6MjA5MjQ2Mzc2M30.AoYhypS7MhMfb-HuaxkIFgt2Kmw1pcsJlIooo4eDI28"
-);
+async function carregar(){
+let {data}=await client.from('pontuacoes').select(`pontos,atiradores(nome)`);
 
-async function carregarRanking() {
+let r={}
+data.forEach(p=>{
+let n=p.atiradores?.nome
+if(!n)return
+r[n]=(r[n]||0)+p.pontos
+})
 
-  let { data, error } = await client
-    .from('pontuacoes')
-    .select(`
-      pontos,
-      atiradores (
-        nome,
-        clubes:clube_id (nome)
-      )
-    `);
+let lista=Object.entries(r).map(([n,p])=>({n,p})).sort((a,b)=>b.p-a.p)
 
-  if (error) {
-    console.error(error);
-    return;
-  }
+let html=""
+lista.forEach((i,x)=>{
+html+=`<tr><td>${x+1}</td><td>${i.n}</td><td>${i.p}</td></tr>`
+})
 
-  let ranking = {};
-
-  data.forEach(p => {
-    let nome = p.atiradores.nome;
-
-    if (!ranking[nome]) {
-      ranking[nome] = {
-        pontos:0,
-        clube:p.atiradores.clubes?.nome || "-"
-      };
-    }
-
-    ranking[nome].pontos += p.pontos;
-  });
-
-  let lista = Object.entries(ranking)
-    .map(([nome,d]) => ({ nome, ...d }))
-    .sort((a,b)=>b.pontos-a.pontos);
-
-  let html="";
-  lista.forEach((i,x)=>{
-    html += `<tr>
-      <td>${x+1}</td>
-      <td>${i.nome}</td>
-      <td>${i.clube}</td>
-      <td>${i.pontos}</td>
-    </tr>`;
-  });
-
-  document.getElementById("ranking").innerHTML = html;
+document.getElementById("ranking").innerHTML=html
 }
-
-carregarRanking();
+carregar()
 </script>
 
-<div class="topbar">
-  <button onclick="history.back()">⬅️ Voltar</button>
-  <button onclick="window.location.href='admin.html'">⚙️ Admin</button>
-</div>
-
-<div class="sidebar">
-  <h2>🏆 Sistema</h2>
-  <a href="dashboard.html">📊 Dashboard</a>
-  <a href="index.html">🏠 Ranking</a>
-  <a href="atletas.html">🎯 Atletas</a>
-  <a href="info.html">ℹ️ Informações</a>
-  <a href="admin.html">⚙️ Admin</a>
-</div>
 </body>
 </html>

@@ -1,76 +1,61 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Admin</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<title>Admin</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
-<body style="background:#0f172a;color:white;font-family:Arial;padding:20px;">
+<body style="background:#0f172a;color:white;font-family:Arial;padding:20px">
 
 <h1>⚙️ Admin</h1>
 
-<h2>Clube</h2>
-<input id="clube_nome">
-<button onclick="addClube()">Salvar</button>
-
 <h2>Atleta</h2>
-<input id="atleta_nome">
-<input id="atleta_categoria">
-<input id="atleta_sexo">
-<select id="select_clube"></select>
+<input id="nome" placeholder="Nome">
+<input id="sexo" placeholder="M ou F">
+<input id="categoria" placeholder="A ou B">
 <button onclick="addAtleta()">Salvar</button>
 
 <h2>Pontuação</h2>
-<select id="select_atleta"></select>
+<select id="atleta"></select>
 <input id="pontos">
-<button onclick="addPontuacao()">Salvar</button>
+<button onclick="addPontos()">Salvar</button>
 
 <script>
 const { createClient } = supabase;
+const client = createClient("https://izpvoeeedpmzvmtartsa.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6cHZvZWVlZHBtenZtdGFydHNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4ODc3NjMsImV4cCI6MjA5MjQ2Mzc2M30.AoYhypS7MhMfb-HuaxkIFgt2Kmw1pcsJlIooo4eDI28");
 
-const client = createClient(
-  "https://izpvoeeedpmzvmtartsa.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6cHZvZWVlZHBtenZtdGFydHNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4ODc3NjMsImV4cCI6MjA5MjQ2Mzc2M30.AoYhypS7MhMfb-HuaxkIFgt2Kmw1pcsJlIooo4eDI28"
-);
+async function carregar(){
+let {data}=await client.from('atiradores').select('*')
 
-async function carregar() {
+let html=""
+data.forEach(a=>{
+html+=`<option value="${a.id}">${a.nome}</option>`
+})
 
-  let { data: clubes } = await client.from('clubes').select('*');
-  let sc = document.getElementById('select_clube');
-  sc.innerHTML='';
-  clubes.forEach(c=> sc.innerHTML += `<option value="${c.id}">${c.nome}</option>`);
-
-  let { data: atletas } = await client.from('atiradores').select('*');
-  let sa = document.getElementById('select_atleta');
-  sa.innerHTML='';
-  atletas.forEach(a=> sa.innerHTML += `<option value="${a.id}">${a.nome}</option>`);
-}
-
-async function addClube(){
-  let nome = document.getElementById('clube_nome').value;
-  await client.from('clubes').insert([{nome}]);
-  carregar();
+document.getElementById("atleta").innerHTML=html
 }
 
 async function addAtleta(){
-  let nome = atleta_nome.value;
-  let categoria = atleta_categoria.value;
-  let sexo = atleta_sexo.value;
-  let clube_id = select_clube.value;
+let nome=document.getElementById("nome").value.trim().toUpperCase()
 
-  await client.from('atiradores').insert([{nome,categoria,sexo,clube_id}]);
-  carregar();
+let {error}=await client.from('atiradores').insert([{nome}])
+
+if(error){alert("Erro ou duplicado");return}
+
+alert("Salvo")
+carregar()
 }
 
-async function addPontuacao(){
-  let atirador_id = select_atleta.value;
-  let pontos = document.getElementById('pontos').value;
+async function addPontos(){
+let atirador_id=document.getElementById("atleta").value
+let pontos=Number(document.getElementById("pontos").value)
 
-  await client.from('pontuacoes').insert([{atirador_id,pontos}]);
-  alert("Salvo!");
+await client.from('pontuacoes').insert([{atirador_id,pontos}])
+
+alert("OK")
 }
 
-carregar();
+carregar()
 </script>
 
 </body>
