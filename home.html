@@ -1,32 +1,171 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Home</title>
+<title>Sistema</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body{
+  margin:0;
+  font-family: 'Segoe UI', Arial;
+  background:linear-gradient(180deg,#020617,#0f172a);
+  color:white;
+}
+
+/* TOPO */
+.header{
+  padding:25px;
+}
+
+.nome{
+  font-size:14px;
+  color:#94a3b8;
+}
+
+h1{
+  margin:5px 0;
+  font-size:24px;
+}
+
+/* GRID */
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:15px;
+  padding:20px;
+}
+
+/* CARD PREMIUM */
+.card{
+  background:linear-gradient(145deg,#020617,#1e293b);
+  border-radius:18px;
+  padding:25px;
+  text-align:center;
+  cursor:pointer;
+  transition:0.25s;
+  box-shadow:0 10px 25px rgba(0,0,0,0.4);
+}
+
+.card:hover{
+  transform:translateY(-5px) scale(1.03);
+}
+
+/* ICON */
+.icon{
+  font-size:28px;
+  margin-bottom:10px;
+}
+
+/* MENU */
+.menu{
+  position:fixed;
+  bottom:15px;
+  left:50%;
+  transform:translateX(-50%);
+  width:90%;
+  background:#020617;
+  border-radius:20px;
+  display:flex;
+  justify-content:space-around;
+  padding:10px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.6);
+}
+
+.menu button{
+  background:none;
+  border:none;
+  color:#94a3b8;
+  font-size:12px;
+  cursor:pointer;
+}
+
+.menu button.active{
+  color:gold;
+}
+
+/* BOTÃO SAIR */
+.logout{
+  position:absolute;
+  right:20px;
+  top:20px;
+  background:gold;
+  border:none;
+  padding:6px 10px;
+  cursor:pointer;
+  border-radius:6px;
+}
+</style>
 </head>
 
-<body style="background:#0f172a;color:white;font-family:Arial;padding:20px">
+<body>
 
-<h1>🏠 Sistema</h1>
+<div class="header">
+  <button class="logout" onclick="logout()">Sair</button>
+  <div class="nome">Bem-vindo</div>
+  <h1 id="user">Sistema</h1>
+</div>
 
-<button onclick="ir('atletas.html')">Atletas</button><br><br>
-<button onclick="ir('index.html')">Ranking</button><br><br>
-<button onclick="ir('etapas.html')">Etapas</button><br><br>
-<button onclick="ir('admin.html')">Admin</button><br><br>
+<div class="grid">
 
-<button onclick="logout()">Sair</button>
+<div class="card" onclick="ir('atletas.html')">
+  <div class="icon">🎯</div>
+  Atletas
+</div>
+
+<div class="card" onclick="ir('index.html')">
+  <div class="icon">🏆</div>
+  Ranking
+</div>
+
+<div class="card" onclick="ir('etapas.html')">
+  <div class="icon">🏁</div>
+  Etapas
+</div>
+
+<div id="admin" class="card" onclick="ir('admin.html')">
+  <div class="icon">⚙️</div>
+  Admin
+</div>
+
+</div>
+
+<div class="menu">
+  <button class="active">🏠</button>
+  <button onclick="ir('atletas.html')">🎯</button>
+  <button onclick="ir('index.html')">🏆</button>
+  <button onclick="ir('etapas.html')">🏁</button>
+</div>
 
 <script>
 const { createClient } = supabase;
 
 const client = createClient(
 "https://izpvoeeedpmzvmtartsa.supabase.co",
-"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6cHZvZWVlZHBtenZtdGFydHNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4ODc3NjMsImV4cCI6MjA5MjQ2Mzc2M30.AoYhypS7MhMfb-HuaxkIFgt2Kmw1pcsJlIooo4eDI28"
 );
 
-async function proteger(){
+async function init(){
+
 const { data: { user } } = await client.auth.getUser();
-if(!user) window.location.href="login.html";
+
+if(!user){
+  window.location.href="login.html";
+  return;
+}
+
+let { data } = await client
+.from('perfis')
+.select('*')
+.eq('id', user.id)
+.single();
+
+document.getElementById("user").innerText = data.nome;
+
+// esconder admin
+if(data.tipo !== "master"){
+document.getElementById("admin").style.display="none";
+}
+
 }
 
 function ir(p){
@@ -38,7 +177,7 @@ client.auth.signOut();
 window.location.href="login.html";
 }
 
-proteger();
+init();
 </script>
 
 </body>
