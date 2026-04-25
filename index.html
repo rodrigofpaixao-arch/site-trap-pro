@@ -5,17 +5,11 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
-<body style="background:#0f172a;color:white;font-family:Arial;padding:20px">
+<body style="background:#0f172a;color:white">
 
-<h1>🏆 Ranking</h1>
+<h2>Ranking</h2>
+
 <table border="1" width="100%">
-<thead>
-<tr>
-<th>#</th>
-<th>Nome</th>
-<th>Pontos</th>
-</tr>
-</thead>
 <tbody id="ranking"></tbody>
 </table>
 
@@ -24,12 +18,12 @@ const { createClient } = supabase;
 
 const client = createClient(
 "https://izpvoeeedpmzvmtartsa.supabase.co",
-"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6cHZvZWVlZHBtenZtdGFydHNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4ODc3NjMsImV4cCI6MjA5MjQ2Mzc2M30.AoYhypS7MhMfb-HuaxkIFgt2Kmw1pcsJlIooo4eDI28"
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 );
 
 async function proteger(){
-  const { data: { user } } = await client.auth.getUser();
-  if(!user) window.location.href = "login.html";
+const { data: { user } } = await client.auth.getUser();
+if(!user) window.location.href="login.html";
 }
 
 async function carregar(){
@@ -38,26 +32,23 @@ let { data } = await client
 .from('pontuacoes')
 .select(`pontos, atiradores(nome)`);
 
-let ranking = {};
+let r={};
 
 data.forEach(p=>{
-let nome = p.atiradores?.nome;
-if(!nome) return;
-
-if(!ranking[nome]) ranking[nome]=0;
-ranking[nome]+=p.pontos;
+let n=p.atiradores?.nome;
+if(!n)return;
+if(!r[n])r[n]=0;
+r[n]+=p.pontos;
 });
-
-let lista = Object.entries(ranking)
-.map(([nome,pontos])=>({nome,pontos}))
-.sort((a,b)=>b.pontos-a.pontos);
 
 let html="";
-lista.forEach((i,x)=>{
-html+=`<tr><td>${x+1}</td><td>${i.nome}</td><td>${i.pontos}</td></tr>`;
+Object.entries(r)
+.sort((a,b)=>b[1]-a[1])
+.forEach((i,x)=>{
+html+=`<tr><td>${x+1}</td><td>${i[0]}</td><td>${i[1]}</td></tr>`;
 });
 
-document.getElementById("ranking").innerHTML = html;
+document.getElementById("ranking").innerHTML=html;
 }
 
 async function iniciar(){

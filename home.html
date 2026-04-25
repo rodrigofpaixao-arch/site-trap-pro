@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Home</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body style="background:#0f172a;color:white;font-family:Arial;padding:20px">
+
+<h1>🏠 Sistema</h1>
+
+<button onclick="ir('atletas.html')">Atletas</button><br><br>
+<button onclick="ir('index.html')">Ranking</button><br><br>
+<button onclick="ir('etapas.html')">Etapas</button><br><br>
+<button onclick="ir('admin.html')">Admin</button><br><br>
+
+<button onclick="logout()">Sair</button>
+
+<script>
+const { createClient } = supabase;
+
+const client = createClient(
+"https://izpvoeeedpmzvmtartsa.supabase.co",
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+);
+
+async function proteger(){
+const { data: { user } } = await client.auth.getUser();
+if(!user) window.location.href="login.html";
+}
+
+function ir(p){
+window.location.href=p;
+}
+
+function logout(){
+client.auth.signOut();
+window.location.href="login.html";
+}
+
+proteger();
+</script>
+
+</body>
+</html>

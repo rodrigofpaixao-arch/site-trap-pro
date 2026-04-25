@@ -5,7 +5,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
-<body style="background:#111;color:white;padding:50px;font-family:Arial">
+<body style="background:#0f172a;color:white;font-family:Arial;padding:50px">
 
 <h2>Login</h2>
 
@@ -14,36 +14,30 @@
 
 <button onclick="login()">Entrar</button>
 
-<p id="msg"></p>
-
 <script>
 const { createClient } = supabase;
 
 const client = createClient(
-  "https://izpvoeeedpmzvmtartsa.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6cHZvZWVlZHBtenZtdGFydHNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4ODc3NjMsImV4cCI6MjA5MjQ2Mzc2M30.AoYhypS7MhMfb-HuaxkIFgt2Kmw1pcsJlIooo4eDI28"
+"https://izpvoeeedpmzvmtartsa.supabase.co",
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6cHZvZWVlZHBtenZtdGFydHNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4ODc3NjMsImV4cCI6MjA5MjQ2Mzc2M30.AoYhypS7MhMfb-HuaxkIFgt2Kmw1pcsJlIooo4eDI28"
 );
 
 async function login(){
 
-  let email = document.getElementById("email").value;
-  let senha = document.getElementById("senha").value;
+let email = document.getElementById("email").value;
+let senha = document.getElementById("senha").value;
 
-  const { data, error } = await client.auth.signInWithPassword({
-    email: email,
-    password: senha
-  });
+let { error } = await client.auth.signInWithPassword({
+  email,
+  password: senha
+});
 
-  if(error){
-    document.getElementById("msg").innerText = error.message;
-    return;
-  }
+if(error){
+  alert(error.message);
+  return;
+}
 
-  document.getElementById("msg").innerText = "Login OK";
-
-  setTimeout(()=>{
-    window.location.href = "dashboard.html";
-  },1000);
+window.location.href = "home.html";
 }
 </script>
 

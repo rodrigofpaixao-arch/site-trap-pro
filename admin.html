@@ -5,11 +5,10 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
-<body style="background:#0f172a;color:white;font-family:Arial;padding:20px">
+<body style="background:#0f172a;color:white">
 
-<h1>⚙️ Admin</h1>
+<h2>Cadastro Atleta</h2>
 
-<h2>Atleta</h2>
 <input id="nome">
 <select id="sexo">
 <option value="M">M</option>
@@ -31,12 +30,12 @@ const client = createClient(
 "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 );
 
-let clube_id = null;
+let clube_id=null;
 
 async function proteger(){
 
 const { data: { user } } = await client.auth.getUser();
-if(!user) window.location.href = "login.html";
+if(!user) window.location.href="login.html";
 
 let { data } = await client
 .from('perfis')
@@ -44,26 +43,22 @@ let { data } = await client
 .eq('id', user.id)
 .single();
 
-clube_id = data.clube_id;
+clube_id=data.clube_id;
 }
 
 async function add(){
 
-let nome = document.getElementById("nome").value.toUpperCase();
-let sexo = document.getElementById("sexo").value;
-let categoria = document.getElementById("categoria").value;
+let nome=document.getElementById("nome").value.toUpperCase();
+let sexo=document.getElementById("sexo").value;
+let categoria=document.getElementById("categoria").value;
 
 await client.from('atiradores')
-.insert([{nome, sexo, categoria, clube_id}]);
+.insert([{nome,sexo,categoria,clube_id}]);
 
 alert("Salvo");
 }
 
-async function iniciar(){
-await proteger();
-}
-
-iniciar();
+proteger();
 </script>
 
 </body>

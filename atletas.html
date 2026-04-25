@@ -5,18 +5,11 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
-<body style="background:#0f172a;color:white;font-family:Arial;padding:20px">
+<body style="background:#0f172a;color:white">
 
-<h1>🎯 Atletas</h1>
+<h2>Atletas</h2>
 
 <table border="1" width="100%">
-<thead>
-<tr>
-<th>Nome</th>
-<th>Sexo</th>
-<th>Categoria</th>
-</tr>
-</thead>
 <tbody id="lista"></tbody>
 </table>
 
@@ -30,26 +23,19 @@ const client = createClient(
 
 async function proteger(){
 const { data: { user } } = await client.auth.getUser();
-if(!user) window.location.href = "login.html";
+if(!user) window.location.href="login.html";
 }
 
 async function carregar(){
 
-let { data } = await client
-.from('atiradores')
-.select('*');
+let { data } = await client.from('atiradores').select('*');
 
 let html="";
-
 data.forEach(a=>{
-html+=`<tr>
-<td>${a.nome}</td>
-<td>${a.sexo}</td>
-<td>${a.categoria}</td>
-</tr>`;
+html+=`<tr><td>${a.nome}</td><td>${a.sexo}</td><td>${a.categoria}</td></tr>`;
 });
 
-document.getElementById("lista").innerHTML = html;
+document.getElementById("lista").innerHTML=html;
 }
 
 async function iniciar(){
