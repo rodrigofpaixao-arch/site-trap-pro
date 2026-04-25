@@ -9,10 +9,6 @@
 
 <h1>⚙️ Admin</h1>
 
-<h2>Clube</h2>
-<input id="clube_nome">
-<button onclick="addClube()">Salvar</button>
-
 <h2>Atleta</h2>
 <input id="nome">
 <select id="sexo">
@@ -25,61 +21,46 @@
 <option value="B">B</option>
 </select>
 
-<select id="clube"></select>
-
-<button onclick="addAtleta()">Salvar</button>
+<button onclick="add()">Salvar</button>
 
 <script>
 const { createClient } = supabase;
 
 const client = createClient(
-  "https://izpvoeeedpmzvmtartsa.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6cHZvZWVlZHBtenZtdGFydHNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4ODc3NjMsImV4cCI6MjA5MjQ2Mzc2M30.AoYhypS7MhMfb-HuaxkIFgt2Kmw1pcsJlIooo4eDI28"
+"https://izpvoeeedpmzvmtartsa.supabase.co",
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 );
 
-// 🔐 PROTEÇÃO
-async function verificarLogin(){
-  const { data: { user } } = await client.auth.getUser();
-  if (!user) window.location.href = "login.html";
+let clube_id = null;
+
+async function proteger(){
+
+const { data: { user } } = await client.auth.getUser();
+if(!user) window.location.href = "login.html";
+
+let { data } = await client
+.from('perfis')
+.select('clube_id')
+.eq('id', user.id)
+.single();
+
+clube_id = data.clube_id;
 }
 
-async function carregar(){
+async function add(){
 
-let {data:clubes}=await client.from('clubes').select('*');
-
-let html=""
-clubes.forEach(c=>{
-html+=`<option value="${c.id}">${c.nome}</option>`
-})
-
-document.getElementById("clube").innerHTML=html
-}
-
-async function addClube(){
-let nome = document.getElementById("clube_nome").value.toUpperCase()
-
-await client.from('clubes').insert([{nome}])
-alert("OK")
-carregar()
-}
-
-async function addAtleta(){
-
-let nome = document.getElementById("nome").value.toUpperCase()
-let sexo = document.getElementById("sexo").value
-let categoria = document.getElementById("categoria").value
-let clube_id = document.getElementById("clube").value
+let nome = document.getElementById("nome").value.toUpperCase();
+let sexo = document.getElementById("sexo").value;
+let categoria = document.getElementById("categoria").value;
 
 await client.from('atiradores')
-.insert([{nome,sexo,categoria,clube_id}])
+.insert([{nome, sexo, categoria, clube_id}]);
 
-alert("OK")
+alert("Salvo");
 }
 
-// 🔥 INICIAR CERTO
 async function iniciar(){
-await verificarLogin();
-carregar();
+await proteger();
 }
 
 iniciar();

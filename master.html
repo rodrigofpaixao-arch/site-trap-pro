@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Master</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body style="background:#0f172a;color:white;font-family:Arial;padding:20px">
+
+<h1>👑 Painel Master</h1>
+
+<h2>Criar Clube</h2>
+<input id="nome_clube">
+<button onclick="criarClube()">Salvar</button>
+
+<h2>Criar Usuário (Cliente)</h2>
+<input id="email" placeholder="Email">
+<input id="senha" placeholder="Senha">
+<select id="clube"></select>
+<button onclick="criarUsuario()">Criar</button>
+
+<script>
+const { createClient } = supabase;
+
+const client = createClient(
+  "https://izpvoeeedpmzvmtartsa.supabase.co",
+  "SUA_ANON_KEY"
+);
+
+let usuario = null;
+
+async function proteger(){
+  const { data: { user } } = await client.auth.getUser();
+  if(!user) window.location.href = "login.html";
+
+  usuario = user;
+
+  let { data } = await client
+    .from('perfis')
+    .select('tipo')
+    .eq('id', user.id)
+    .single();
+
+  if(data.tipo !== "master"){
+    alert("Acesso negado");
+    window.location.href = "dashboard.html";
+  }
+}
+
+async function carregarClubes(){
+  let { data } = await client.from('clubes').select('*');
+
+  let html="";
+  data.forEach(c=>{
+    html+=`<option value="${c.id}">${c.nome}</option>`;
+  });
+
+  document.getElementById("clube").innerHTML = html;
+}
+
+async function criarClube(){
+  let nome = document.getElementById("nome_clube").value.toUpperCase();
+
+  await client.from('clubes').insert([{nome}]);
+
+  alert("Clube criado");
+  carregarClubes();
+}
+
+async function criarUsuario(){
+
+  let email = document.getElementById("email").value;
+  let senha = document.getElementById("senha").value;
+  let clube_id = document.getElementById("clube").value;
+
+  // cria usuário no auth
+  let { data, error } = await client.auth.signUp({
+    email,
+    password: senha
+  });
+
+  if(error){
+    alert("Erro ao criar usuário");
+    return;
+  }
+
+  // vincula no banco
+  await client.from('perfis').insert([{
+    id: data.user.id,
+    nome: email,
+    tipo: "clube",
+    clube_id
+  }]);
+
+  alert("Usuário criado e vinculado ao clube");
+}
+
+async function iniciar(){
+  await proteger();
+  carregarClubes();
+}
+
+iniciar();
+</script>
+
+</body>
+</html>

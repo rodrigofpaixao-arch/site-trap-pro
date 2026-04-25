@@ -3,69 +3,69 @@
 <head>
 <title>Ranking</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<style>
-body{margin:0;font-family:Arial;background:#0f172a;color:white}
-.sidebar{position:fixed;left:-250px;top:0;width:250px;height:100%;background:#020617;padding:20px;transition:.3s}
-.sidebar.active{left:0}
-.sidebar a{display:block;margin:10px 0;padding:10px;color:white;text-decoration:none}
-.topbar{background:#020617;padding:15px;display:flex;gap:10px}
-.content{padding:20px}
-table{width:100%;border-collapse:collapse}
-td,th{border:1px solid #334155;padding:8px}
-@media(min-width:768px){.sidebar{left:0}.content{margin-left:250px}}
-</style>
 </head>
 
-<body>
+<body style="background:#0f172a;color:white;font-family:Arial;padding:20px">
 
-<div id="sidebar" class="sidebar">
-<h2>🏆 Sistema</h2>
-<a href="dashboard.html">Dashboard</a>
-<a href="index.html">Ranking</a>
-<a href="atletas.html">Atletas</a>
-<a href="admin.html">Admin</a>
-</div>
-
-<div class="topbar">
-<button onclick="toggleMenu()">☰</button>
-<button onclick="history.back()">⬅️</button>
-</div>
-
-<div class="content">
 <h1>🏆 Ranking</h1>
-<table>
-<thead><tr><th>#</th><th>Nome</th><th>Pontos</th></tr></thead>
+<table border="1" width="100%">
+<thead>
+<tr>
+<th>#</th>
+<th>Nome</th>
+<th>Pontos</th>
+</tr>
+</thead>
 <tbody id="ranking"></tbody>
 </table>
-</div>
 
 <script>
-function toggleMenu(){document.getElementById("sidebar").classList.toggle("active")}
-
 const { createClient } = supabase;
-const client = createClient("https://izpvoeeedpmzvmtartsa.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6cHZvZWVlZHBtenZtdGFydHNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4ODc3NjMsImV4cCI6MjA5MjQ2Mzc2M30.AoYhypS7MhMfb-HuaxkIFgt2Kmw1pcsJlIooo4eDI28");
+
+const client = createClient(
+"https://izpvoeeedpmzvmtartsa.supabase.co",
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6cHZvZWVlZHBtenZtdGFydHNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4ODc3NjMsImV4cCI6MjA5MjQ2Mzc2M30.AoYhypS7MhMfb-HuaxkIFgt2Kmw1pcsJlIooo4eDI28"
+);
+
+async function proteger(){
+  const { data: { user } } = await client.auth.getUser();
+  if(!user) window.location.href = "login.html";
+}
 
 async function carregar(){
-let {data}=await client.from('pontuacoes').select(`pontos,atiradores(nome)`);
 
-let r={}
+let { data } = await client
+.from('pontuacoes')
+.select(`pontos, atiradores(nome)`);
+
+let ranking = {};
+
 data.forEach(p=>{
-let n=p.atiradores?.nome
-if(!n)return
-r[n]=(r[n]||0)+p.pontos
-})
+let nome = p.atiradores?.nome;
+if(!nome) return;
 
-let lista=Object.entries(r).map(([n,p])=>({n,p})).sort((a,b)=>b.p-a.p)
+if(!ranking[nome]) ranking[nome]=0;
+ranking[nome]+=p.pontos;
+});
 
-let html=""
+let lista = Object.entries(ranking)
+.map(([nome,pontos])=>({nome,pontos}))
+.sort((a,b)=>b.pontos-a.pontos);
+
+let html="";
 lista.forEach((i,x)=>{
-html+=`<tr><td>${x+1}</td><td>${i.n}</td><td>${i.p}</td></tr>`
-})
+html+=`<tr><td>${x+1}</td><td>${i.nome}</td><td>${i.pontos}</td></tr>`;
+});
 
-document.getElementById("ranking").innerHTML=html
+document.getElementById("ranking").innerHTML = html;
 }
-carregar()
+
+async function iniciar(){
+await proteger();
+carregar();
+}
+
+iniciar();
 </script>
 
 </body>
