@@ -3,29 +3,51 @@
 <head>
 <title>Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body{background:#0f172a;color:white;font-family:Arial;padding:20px}
+.card{background:#020617;padding:15px;margin:10px;border-radius:10px}
+h2{color:gold}
+</style>
 </head>
 
-<body style="background:#0f172a;color:white;font-family:Arial;padding:20px">
+<body>
 
 <h1>📊 Dashboard</h1>
 
+<div class="card">
 <h2>👩 Feminino</h2>
 <div id="f"></div>
+</div>
 
+<div class="card">
 <h2>👨 Masculino A</h2>
 <div id="ma"></div>
+</div>
 
+<div class="card">
 <h2>👨 Masculino B</h2>
 <div id="mb"></div>
+</div>
 
 <script>
 const { createClient } = supabase;
-const client = createClient("https://izpvoeeedpmzvmtartsa.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6cHZvZWVlZHBtenZtdGFydHNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4ODc3NjMsImV4cCI6MjA5MjQ2Mzc2M30.AoYhypS7MhMfb-HuaxkIFgt2Kmw1pcsJlIooo4eDI28");
+
+const client = createClient(
+  "https://izpvoeeedpmzvmtartsa.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6cHZvZWVlZHBtenZtdGFydHNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4ODc3NjMsImV4cCI6MjA5MjQ2Mzc2M30.AoYhypS7MhMfb-HuaxkIFgt2Kmw1pcsJlIooo4eDI28"
+);
+
+// 🔐 PROTEÇÃO
+async function verificarLogin(){
+  const { data: { user } } = await client.auth.getUser();
+  if (!user) window.location.href = "login.html";
+}
 
 async function carregar(){
 
 let {data}=await client.from('pontuacoes')
-.select(`pontos,atiradores(nome,sexo,categoria)`)
+.select(`pontos, atiradores(nome,sexo,categoria)`)
 
 let r={}
 
@@ -44,9 +66,9 @@ let lista=Object.entries(r).map(([n,d])=>({n,...d}))
 
 function render(filtro,id){
 let html=""
-lista.filter(filtro).sort((a,b)=>b.p-a.p)
+lista.filter(filtro).sort((a,b)=>b.p-a.p).slice(0,5)
 .forEach((i,x)=>{
-html+=`${x+1}º - ${i.n} (${i.p})<br>`
+html+=`<b>${x+1}º</b> - ${i.n} (${i.p})<br>`
 })
 document.getElementById(id).innerHTML=html
 }
@@ -56,7 +78,13 @@ render(a=>a.s==="M"&&a.c==="A","ma")
 render(a=>a.s==="M"&&a.c==="B","mb")
 }
 
-carregar()
+// 🔥 ORDEM CORRETA
+async function iniciar(){
+  await verificarLogin();
+  carregar();
+}
+
+iniciar();
 </script>
 
 </body>
