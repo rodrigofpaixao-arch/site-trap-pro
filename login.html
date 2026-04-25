@@ -5,14 +5,16 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
-<body style="background:#0f172a;color:white;font-family:Arial;padding:50px">
+<body style="background:#111;color:white;padding:50px;font-family:Arial">
 
-<h1>🔐 Login</h1>
+<h2>Login</h2>
 
 <input id="email" placeholder="Email"><br><br>
 <input id="senha" type="password" placeholder="Senha"><br><br>
 
 <button onclick="login()">Entrar</button>
+
+<p id="msg"></p>
 
 <script>
 const { createClient } = supabase;
@@ -24,20 +26,24 @@ const client = createClient(
 
 async function login(){
 
-let email = document.getElementById("email").value;
-let senha = document.getElementById("senha").value;
+  let email = document.getElementById("email").value;
+  let senha = document.getElementById("senha").value;
 
-let {error} = await client.auth.signInWithPassword({
-  email,
-  password: senha
-});
+  const { data, error } = await client.auth.signInWithPassword({
+    email: email,
+    password: senha
+  });
 
-if(error){
-  alert("Erro no login");
-  return;
-}
+  if(error){
+    document.getElementById("msg").innerText = error.message;
+    return;
+  }
 
-window.location.href = "dashboard.html";
+  document.getElementById("msg").innerText = "Login OK";
+
+  setTimeout(()=>{
+    window.location.href = "dashboard.html";
+  },1000);
 }
 </script>
 
