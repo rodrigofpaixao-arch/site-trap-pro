@@ -3,16 +3,26 @@
 <head>
 <title>Admin</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body{font-family:Arial;background:#f1f5f9;padding:20px;}
+.box{background:white;padding:20px;border-radius:10px;margin-bottom:20px;}
+input,select,button{padding:10px;margin:5px;}
+</style>
 </head>
 
-<body style="background:#0f172a;color:white">
+<body>
 
-<h2>Cadastro Atleta</h2>
+<h1>⚙️ Admin</h1>
 
-<input id="nome">
-<select id="sexo">
-<option value="M">M</option>
-<option value="F">F</option>
+<div class="box">
+<h2>Cadastrar Atleta</h2>
+
+<input id="nome" placeholder="Nome">
+
+<select id="sexo" onchange="ajustarCategoria()">
+<option value="M">Masculino</option>
+<option value="F">Feminino</option>
 </select>
 
 <select id="categoria">
@@ -20,45 +30,51 @@
 <option value="B">B</option>
 </select>
 
-<button onclick="add()">Salvar</button>
+<button onclick="cadastrar()">Salvar</button>
+</div>
 
 <script>
-const { createClient } = supabase;
-
-const client = createClient(
+const client = supabase.createClient(
 "https://izpvoeeedpmzvmtartsa.supabase.co",
-"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+"SUA_ANON_KEY"
 );
 
-let clube_id=null;
+// 🔥 BLOQUEIO INTELIGENTE
+function ajustarCategoria(){
+let sexo = document.getElementById("sexo").value;
+let cat = document.getElementById("categoria");
 
-async function proteger(){
-
-const { data: { user } } = await client.auth.getUser();
-if(!user) window.location.href="login.html";
-
-let { data } = await client
-.from('perfis')
-.select('clube_id')
-.eq('id', user.id)
-.single();
-
-clube_id=data.clube_id;
+if(sexo === "F"){
+  cat.value = "A";
+  cat.innerHTML = `<option value="A">A</option>`;
+}else{
+  cat.innerHTML = `
+    <option value="A">A</option>
+    <option value="B">B</option>
+  `;
+}
 }
 
-async function add(){
+// cadastrar
+async function cadastrar(){
 
-let nome=document.getElementById("nome").value.toUpperCase();
-let sexo=document.getElementById("sexo").value;
-let categoria=document.getElementById("categoria").value;
+let nome = document.getElementById("nome").value;
+let sexo = document.getElementById("sexo").value;
+let categoria = document.getElementById("categoria").value;
 
-await client.from('atiradores')
-.insert([{nome,sexo,categoria,clube_id}]);
+let { error } = await client
+.from('atiradores')
+.insert([{ nome, sexo, categoria }]);
 
-alert("Salvo");
+if(error){
+  alert("Erro: " + error.message);
+}else{
+  alert("Cadastrado!");
+}
 }
 
-proteger();
+// iniciar
+ajustarCategoria();
 </script>
 
 </body>
