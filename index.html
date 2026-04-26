@@ -3,56 +3,117 @@
 <head>
 <title>Ranking</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body{margin:0;font-family:Arial;background:#f1f5f9;}
+.header{background:#b91c1c;color:white;padding:15px;}
+.menu{background:white;padding:10px;border-bottom:1px solid #ddd;}
+.menu a{margin-right:15px;text-decoration:none;color:#333;font-weight:bold;}
+.container{max-width:1000px;margin:auto;background:white;padding:20px;margin-top:20px;border-radius:8px;}
+select{padding:8px;margin-right:10px;}
+table{width:100%;border-collapse:collapse;margin-top:20px;}
+th,td{padding:10px;border-bottom:1px solid #eee;}
+tr:hover{background:#f9fafb;cursor:pointer;}
+</style>
 </head>
 
-<body style="background:#0f172a;color:white">
+<body>
 
-<h2>Ranking</h2>
+<div class="header"><h1>🏆 Ranking</h1></div>
 
-<table border="1" width="100%">
+<div class="menu">
+<a href="index.html">Ranking</a>
+<a href="atletas.html">Atletas</a>
+<a href="etapas.html">Etapas</a>
+</div>
+
+<div class="container">
+
+<select id="etapa" onchange="carregar()"></select>
+
+<select id="sexo" onchange="carregar()">
+<option value="">Todos</option>
+<option value="M">Masculino</option>
+<option value="F">Feminino</option>
+</select>
+
+<select id="categoria" onchange="carregar()">
+<option value="">Todas</option>
+<option value="A">A</option>
+<option value="B">B</option>
+</select>
+
+<table>
+<thead>
+<tr><th>#</th><th>Atleta</th><th>Pontos</th></tr>
+</thead>
 <tbody id="ranking"></tbody>
 </table>
 
-<script>
-const { createClient } = supabase;
+</div>
 
-const client = createClient(
+<script>
+const client = supabase.createClient(
 "https://izpvoeeedpmzvmtartsa.supabase.co",
-"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6cHZvZWVlZHBtenZtdGFydHNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4ODc3NjMsImV4cCI6MjA5MjQ2Mzc2M30.AoYhypS7MhMfb-HuaxkIFgt2Kmw1pcsJlIooo4eDI28"
 );
 
-async function proteger(){
-const { data: { user } } = await client.auth.getUser();
-if(!user) window.location.href="login.html";
+async function carregarEtapas(){
+let { data } = await client.from('etapas').select('*');
+let html = `<option value="">Geral</option>`;
+data.forEach(e=>{
+html += `<option value="${e.id}">${e.nome}</option>`;
+});
+document.getElementById("etapa").innerHTML = html;
 }
 
 async function carregar(){
 
+let etapa = document.getElementById("etapa").value;
+let sexo = document.getElementById("sexo").value;
+let categoria = document.getElementById("categoria").value;
+
 let { data } = await client
 .from('pontuacoes')
-.select(`pontos, atiradores(nome)`);
+.select(`pontos,etapa_id,atiradores(id,nome,sexo,categoria)`);
 
-let r={};
+let ranking = {};
 
 data.forEach(p=>{
-let n=p.atiradores?.nome;
-if(!n)return;
-if(!r[n])r[n]=0;
-r[n]+=p.pontos;
+let a = p.atiradores;
+if(!a) return;
+
+if(etapa && p.etapa_id != etapa) return;
+if(sexo && a.sexo != sexo) return;
+if(categoria && a.categoria != categoria) return;
+
+if(!ranking[a.id]) ranking[a.id] = {nome:a.nome,pontos:0};
+
+ranking[a.id].pontos += p.pontos;
 });
+
+let lista = Object.entries(ranking)
+.map(([id,v])=>({id,...v}))
+.sort((a,b)=>b.pontos-a.pontos);
 
 let html="";
-Object.entries(r)
-.sort((a,b)=>b[1]-a[1])
-.forEach((i,x)=>{
-html+=`<tr><td>${x+1}</td><td>${i[0]}</td><td>${i[1]}</td></tr>`;
+lista.forEach((i,index)=>{
+html+=`<tr onclick="ver(${i.id})">
+<td>${index+1}</td>
+<td>${i.nome}</td>
+<td>${i.pontos}</td>
+</tr>`;
 });
 
-document.getElementById("ranking").innerHTML=html;
+document.getElementById("ranking").innerHTML = html;
+}
+
+function ver(id){
+window.location.href="atleta.html?id="+id;
 }
 
 async function iniciar(){
-await proteger();
+await carregarEtapas();
 carregar();
 }
 
